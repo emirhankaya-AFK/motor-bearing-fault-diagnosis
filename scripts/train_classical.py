@@ -9,7 +9,15 @@ import numpy as np
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, classification_report, f1_score
 
-from bearing_fault import LABELS, extract_feature_matrix, feature_names, load_dataset
+from bearing_fault import (
+    LABELS,
+    add_gaussian_noise_at_snr,
+    expected_calibration_error,
+    extract_feature_matrix,
+    feature_names,
+    load_dataset,
+    multiclass_brier_score,
+)
 
 
 def main() -> None:
@@ -32,19 +40,46 @@ def main() -> None:
         )
         model.fit(features[train_mask], labels[train_mask])
         predictions = model.predict(features[test_mask])
+        probabilities = model.predict_proba(features[test_mask])
+        encoded_targets = np.asarray(
+            [list(model.classes_).index(label) for label in labels[test_mask]]
+        )
+        report = classification_report(
+            labels[test_mask], predictions, labels=LABELS, output_dict=True, zero_division=0
+        )
         fold = {
             "held_out_load_hp": int(test_load),
             "train_recordings": sorted(np.unique(recording_ids[train_mask]).tolist()),
             "test_recordings": sorted(np.unique(recording_ids[test_mask]).tolist()),
             "accuracy": round(float(accuracy_score(labels[test_mask], predictions)), 4),
             "macro_f1": round(float(f1_score(labels[test_mask], predictions, average="macro")), 4),
-            "classification_report": classification_report(
-                labels[test_mask], predictions, labels=LABELS, output_dict=True, zero_division=0
+            "worst_class_recall": round(min(report[label]["recall"] for label in LABELS), 4),
+            "expected_calibration_error": round(
+                expected_calibration_error(probabilities, encoded_targets), 4
             ),
+            "multiclass_brier_score": round(
+                multiclass_brier_score(probabilities, encoded_targets), 4
+            ),
+            "classification_report": report,
         }
         folds.append(fold)
         if test_load == 3:
             holdout_model = model
+            fold["noise_robustness"] = {}
+            for snr_db in (20, 10, 5, 0):
+                noisy_windows = add_gaussian_noise_at_snr(
+                    windows[test_mask], snr_db=snr_db, seed=42
+                )
+                noisy_predictions = model.predict(extract_feature_matrix(noisy_windows))
+                fold["noise_robustness"][f"{snr_db}_db"] = {
+                    "accuracy": round(
+                        float(accuracy_score(labels[test_mask], noisy_predictions)), 4
+                    ),
+                    "macro_f1": round(
+                        float(f1_score(labels[test_mask], noisy_predictions, average="macro")),
+                        4,
+                    ),
+                }
             ConfusionMatrixDisplay.from_predictions(
                 labels[test_mask], predictions, labels=LABELS, normalize="true", cmap="Blues"
             )

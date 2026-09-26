@@ -29,6 +29,9 @@
       ],
       "accuracy": 1.0,
       "macro_f1": 1.0,
+      "worst_class_recall": 1.0,
+      "expected_calibration_error": 0.0222,
+      "multiclass_brier_score": 0.0013,
       "classification_report": {
         "normal": {
           "precision": 1.0,
@@ -93,6 +96,9 @@
       ],
       "accuracy": 1.0,
       "macro_f1": 1.0,
+      "worst_class_recall": 1.0,
+      "expected_calibration_error": 0.0022,
+      "multiclass_brier_score": 0.0,
       "classification_report": {
         "normal": {
           "precision": 1.0,
@@ -157,6 +163,9 @@
       ],
       "accuracy": 1.0,
       "macro_f1": 1.0,
+      "worst_class_recall": 1.0,
+      "expected_calibration_error": 0.0017,
+      "multiclass_brier_score": 0.0,
       "classification_report": {
         "normal": {
           "precision": 1.0,
@@ -221,6 +230,9 @@
       ],
       "accuracy": 1.0,
       "macro_f1": 1.0,
+      "worst_class_recall": 1.0,
+      "expected_calibration_error": 0.0256,
+      "multiclass_brier_score": 0.0041,
       "classification_report": {
         "normal": {
           "precision": 1.0,
@@ -258,6 +270,24 @@
           "recall": 1.0,
           "f1-score": 1.0,
           "support": 415.0
+        }
+      },
+      "noise_robustness": {
+        "20_db": {
+          "accuracy": 1.0,
+          "macro_f1": 1.0
+        },
+        "10_db": {
+          "accuracy": 1.0,
+          "macro_f1": 1.0
+        },
+        "5_db": {
+          "accuracy": 1.0,
+          "macro_f1": 1.0
+        },
+        "0_db": {
+          "accuracy": 0.8578,
+          "macro_f1": 0.7049
         }
       }
     }

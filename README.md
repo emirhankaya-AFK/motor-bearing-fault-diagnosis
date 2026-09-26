@@ -48,6 +48,9 @@ Generated outputs live in `artifacts/`:
 - per-load accuracy, macro-F1 and class-level metrics
 - normalized confusion matrix for the 3 HP holdout
 - feature importance for the classical baseline
+- expected calibration error, multiclass Brier score and worst-class recall
+- additive Gaussian-noise stress test from 20 dB down to 0 dB SNR
+- time/FFT/wavelet feature-family ablation on the 3 HP holdout
 - CNN validation and untouched 3 HP test metrics
 - SHA-256 checksums for downloaded source files
 
@@ -65,6 +68,18 @@ The reproducible run on 1,537 non-overlapping windows produced:
 ![Normalized confusion matrix for the 3 HP holdout](artifacts/confusion_matrix_load_3.png)
 
 The perfect score should be read as evidence that these four controlled CWRU conditions are highly separable, not that the models have solved industrial bearing diagnosis. The source files, splits and class-level reports are recorded in `artifacts/classical_metrics.json` and `artifacts/cnn_metrics.json` so the result can be audited.
+
+The clean 3 HP holdout remains perfect at 5–20 dB added-noise tests, but falls to **0.7049 macro-F1 at 0 dB SNR**. This failure boundary is more informative than the clean score alone. Feature-family ablation and noise results are stored in `artifacts/ablation_metrics.json` and `artifacts/classical_metrics.json`.
+
+## Single-file inference
+
+After training the classical model, a CWRU-style MATLAB file can be checked with:
+
+```bash
+python scripts/predict_mat.py data/raw/108.mat
+```
+
+The command aggregates window probabilities and prints a warning that confidence is specific to the CWRU training domain.
 
 ## Limits
 
